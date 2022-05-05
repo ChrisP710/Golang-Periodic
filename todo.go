@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	"strconv"
 
 	"strings"
 
 	// "regexp"
-	"bytes"
+	// "bytes"
 	// "time"
 
 	todo "github.com/1set/todotxt"
@@ -24,8 +25,6 @@ func main() {
 
 	if os.Args[1] == "ls" {
 		getTasks()
-	} else if os.Args[1] == "completed" {
-		// getTasks()
 	} else if os.Args[1] == "add" {
 		addTask()
 	} else if os.Args[1] == "rm" {
@@ -153,6 +152,7 @@ func getProjects() {
 			taskProjects = append(tasklist[i].Projects, taskProjects...)
 		}
 	}
+
 	taskProjectsDupFree := make([]string, 0, 100)
 
 	for i := 0; i < len(taskProjects); i++ {
@@ -173,58 +173,34 @@ func getTags() {
 		log.Fatal(err)
 	}
 
-	for i := 0; i < len(tasklist); i++ {
-		if len(tasklist[i].AdditionalTags) > 0 {
-			// fmt.Println(createKeyValuePairs(tasklist[i].AdditionalTags))
-			fmt.Println(tasklist[i].AdditionalTags)
+	// for i := 0; i < len(tasklist); i++ {
+	// 	if len(tasklist[i].AdditionalTags) > 0 {
+	// 		fmt.Println(tasklist[i].AdditionalTags)
+	// 	}
+	// }
 
+	var finalMap = make(map[string]bool)
+
+	for _, tk := range tasklist {
+		for key, value := range tk.AdditionalTags {
+			mapEntry := fmt.Sprintf("%s:%s", key, value)
+			finalMap[mapEntry] = true
 		}
 	}
 
-	// for i := 0; i < len(tasklist); i++ {
-	// 	if len(tasklist[i].AdditionalTags) > 0 {
-	// 		seperatedString := strings.Split(createKeyValuePairs(tasklist[i].AdditionalTags), " ")
-	// 		fmt.Println("test\n", seperatedString)
-
-	// 	}
-	// }
-
-	// taskTags := make([]string, 0, 100)
-
-	// for i := 0; i < len(tasklist); i++ {
-	// 	if len(tasklist[i].AdditionalTags) > 0 {
-	// 		taskTags = append(createKeyValuePairs(tasklist[i].AdditionalTags), taskTags...)
-	// 	}
-	// }
-
-	// taskTagsDupFree := make([]string, 0, 100)
-
-	// for i := 0; i < len(taskTags); i++ {
-	// 	taskTagsDupFree = removeDupStr(taskTags)
-	// }
-
-	// for i := 0; i < len (taskTagsDupFree); i++ {
-	// 	fmt.Println(taskTagsDupFree[i])
-	// }
-
+	for key, _ := range finalMap {
+		fmt.Println(key)
+	}
 }
 
 func removeDupStr(tasklistSlice []string) []string {
 	allKeys := make(map[string]bool)
-	list := []string{}
-	for _, item := range tasklistSlice {
-		if _, value := allKeys[item]; !value {
-			allKeys[item] = true
-			list = append(list, item)
+	projectList := []string{}
+	for _, project := range tasklistSlice {
+		if _, value := allKeys[project]; !value {
+			allKeys[project] = true
+			projectList = append(projectList, project)
 		}
 	}
-	return list
-}
-
-func createKeyValuePairs(m map[string]string) string {
-	b := new(bytes.Buffer)
-	for key, value := range m {
-		fmt.Fprintf(b, "%s=\"%s\"\n", key, value)
-	}
-	return b.String()
+	return projectList
 }
