@@ -40,11 +40,35 @@ func main() {
 
 // Gets all tasks (NEED TO PRIORTIZE)
 func getTasks() {
+	// rudimentary get task (no filter/sort)
+	// if tasklist, err := todo.LoadFromPath("todo.txt"); err != nil {
+	// 	log.Fatal(err)
+	// } else {
+	// 	fmt.Print(tasklist)
+	// }
 
-	if tasklist, err := todo.LoadFromPath("todo.txt"); err != nil {
+	var tasklist todo.TaskList
+
+	// Prints completed Tasks for default LS
+	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Print(tasklist)
+		tasklist := tasklist.Filter(todo.FilterNotCompleted)
+		if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	}
+
+	// Prints non-completed Tasks for default LS
+	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
+		log.Fatal(err)
+	} else {
+		tasklist := tasklist.Filter(todo.FilterCompleted)
+		if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
 	}
 }
 
