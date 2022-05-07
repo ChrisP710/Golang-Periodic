@@ -58,7 +58,12 @@ func main() {
 
 	// ls - |Order
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
-		getTasksOrder(tasklist, &tasklist2)
+		tasklist3 := getTasksOrder(tasklist, &tasklist2)
+
+		for _, taskNew := range tasklist3 {
+			fmt.Println(taskNew.Original)
+		}
+		return
 	}
 
 	// add <task-id>
@@ -265,9 +270,9 @@ func getTasksOrder(tasklist todo.TaskList, tasklist2 *map[string]bool) todo.Task
 		if err != nil {
 			log.Fatal(err)
 		}
-		// fmt.Println(newTask, "newTask")
+		// fmt.Println(newTask, "\n newTask")
 		tasklist.AddTask(newTask)
-		// fmt.Println(tasklist, "tasklistfuck")
+		// fmt.Println(tasklist, "\ntasklistfuck")
 	}
 	// fmt.Println(tasklist, "tasklist3")
 	// fmt.Println(*tasklist2, "tasklist4")
