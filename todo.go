@@ -9,7 +9,7 @@ import (
 
 	"regexp"
 	"strings"
-	
+
 	// "bytes"
 	// "time"
 
@@ -32,40 +32,54 @@ func main() {
 		os.Exit(1)
 	}
 
+	// ******	Bonus	******
+	if os.Args[1] == "man" || os.Args[1] == "help" {
+		todoExplain()
+	}
+
+	// ls - @Context
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
 		getTasksContext(tasklist, &tasklist2)
 	}
 
+	// ls - +Project
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "+") == true {
 		getTasksProjects(tasklist, &tasklist2)
 	}
 
+	// ls - Default
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
 		getTasksDefault(tasklist)
 
 		return
 	}
 
+	// ls - |Order
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
 		getTasksOrder(tasklist, tasklist2)
 	}
 
+	// add <task-id>
 	if os.Args[1] == "add" {
 		addTask(tasklist)
 	}
 
+	// remove <task-id>
 	if os.Args[1] == "rm" {
 		removeTask(tasklist)
 	}
 
+	// do <task-id>
 	if os.Args[1] == "do" {
 		completeTask(tasklist)
 	}
 
+	// projects
 	if os.Args[1] == "projects" {
 		getProjects(tasklist)
 	}
 
+	// tags
 	if os.Args[1] == "tags" {
 		getTags(tasklist)
 	}
@@ -78,12 +92,6 @@ func main() {
 //----------------------- Avoid using Prints -----------------------------
 
 func getTasksDefault(tasklist todo.TaskList) {
-
-	// if tasklist, err := todo.LoadFromPath("todo.txt"); err != nil {
-	// 	log.Fatal(err)
-	// } else {
-	// 	fmt.Print(tasklist)
-	// }
 
 	// Prints completed Tasks for default LS
 
@@ -104,9 +112,6 @@ func getTasksDefault(tasklist todo.TaskList) {
 }
 
 func addTask(tasklist todo.TaskList) {
-	// Create empty Tasklist
-
-	// Populates tasklist from file
 
 	//Concatenating user input into single string and setting it to a variable
 	userInput := strings.Join(os.Args[2:], " ")
@@ -228,11 +233,9 @@ func getTags(tasklist todo.TaskList) {
 	}
 }
 
-// When using function in windows, must put in string due to "|"
 func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) todo.TaskList {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
-	// delete below line if you want to include completed or you could opt copy & paste everything with "tasklist = tasklist.Filter(todo.FilterCompleted) to have completed show on another line."
 	tasklist = todo.NewTaskList()
 
 	for key, _ := range tasklist2 {
@@ -365,8 +368,6 @@ func getTasksProjects(tasklist todo.TaskList, tasklist2 *map[string]bool) {
 		for _, ui := range userInputProjects {
 			// fmt.Println(ui)
 			if strings.Contains(tk.Original, ui) {
-				// fmt.Println(tk.Original)
-
 				(*tasklist2)[tk.Original] = true
 			}
 		}
@@ -380,7 +381,16 @@ func extractProject(userProject string) []string {
 	return contexts
 }
 
+// ******	Bonus	******
 func todoExplain() {
-	println(color.Ize(color.Red, "This is red"))
-
+	// Added Color just for fun
+	println(color.InBold("\n\n****************************************************************************************************************"))
+	println(color.InBold("       Command                                                      Command Description"))
+	println(color.InCyan("ls <optional-parameters>                     Displays TodoList; Optional Parameters: @context, +project, |order;"))
+	println(color.InGreen("add <task-string>                            Adds new task to todo.txt"))
+	println(color.InRed("rm <task-id>                                 Remove task from todo.txt by inputted taskID"))
+	println(color.InYellow("do <task-id>                                 Mark task completed on todo.txt by inputted taskID"))
+	println(color.InPurple("tags                                         Displays all tags - No Duplicates"))
+	println(color.InBlue("projects                                     Displays all projects - No Duplicates"))
+	println(color.InBold("****************************************************************************************************************\n\n"))
 }
