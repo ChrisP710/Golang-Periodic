@@ -23,8 +23,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	if os.Args[1] == "ls" {
-		getTasks()
+	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
+		getTasksDefault()
+	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
+		getTasksOrder()
 	} else if os.Args[1] == "add" {
 		addTask()
 	} else if os.Args[1] == "rm" {
@@ -38,9 +40,8 @@ func main() {
 	}
 }
 
-// Gets all tasks (NEED TO PRIORTIZE)
-func getTasks() {
-	// rudimentary get task (no filter/sort)
+func getTasksDefault() {
+
 	// if tasklist, err := todo.LoadFromPath("todo.txt"); err != nil {
 	// 	log.Fatal(err)
 	// } else {
@@ -60,7 +61,7 @@ func getTasks() {
 		fmt.Println(tasklist)
 	}
 
-	// Prints non-completed Tasks for default LS
+	// Prints non-completed Tasks for default LS | Note: Unsure if completed task are meant to be displayed with default ls command
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	} else {
@@ -103,12 +104,10 @@ func addTask() {
 func removeTask() {
 	var tasklist todo.TaskList
 
-	// Populates tasklist from file
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	}
 
-	// Concatenating user input into single string and setting it to a variable
 	userInput := os.Args[2]
 
 	intInput, err := strconv.Atoi(userInput)
@@ -118,7 +117,6 @@ func removeTask() {
 
 	tasklist.RemoveTaskByID(intInput)
 
-	//Writing new list to todo.txt
 	err = tasklist.WriteToPath("todo.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -128,12 +126,10 @@ func removeTask() {
 func completeTask() {
 	var tasklist todo.TaskList
 
-	// Populates tasklist from file
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	}
 
-	// Concatenating user input into single string and setting it to a variable
 	userInput := os.Args[2]
 
 	intInput, err := strconv.Atoi(userInput)
@@ -148,7 +144,6 @@ func completeTask() {
 
 	task.Complete()
 
-	//Writing new list to todo.txt
 	err = tasklist.WriteToPath("todo.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -158,7 +153,6 @@ func completeTask() {
 func getProjects() {
 	var tasklist todo.TaskList
 
-	// Populates tasklist from file
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	}
@@ -189,10 +183,21 @@ func getProjects() {
 
 }
 
+func removeDupStr(tasklistSlice []string) []string {
+	allKeys := make(map[string]bool)
+	projectList := []string{}
+	for _, project := range tasklistSlice {
+		if _, value := allKeys[project]; !value {
+			allKeys[project] = true
+			projectList = append(projectList, project)
+		}
+	}
+	return projectList
+}
+
 func getTags() {
 	var tasklist todo.TaskList
 
-	// Populates tasklist from file
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	}
@@ -217,14 +222,96 @@ func getTags() {
 	}
 }
 
-func removeDupStr(tasklistSlice []string) []string {
-	allKeys := make(map[string]bool)
-	projectList := []string{}
-	for _, project := range tasklistSlice {
-		if _, value := allKeys[project]; !value {
-			allKeys[project] = true
-			projectList = append(projectList, project)
-		}
+func getTasksOrder() {
+
+	var tasklist todo.TaskList
+
+	// Prints completed Tasks for default LS
+	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
+		log.Fatal(err)
 	}
-	return projectList
+	tasklist = tasklist.Filter(todo.FilterNotCompleted)
+
+	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
+	if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttaskidasc") == true {
+		if err := tasklist.Sort(todo.SortTaskIDAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttaskiddesc") == true {
+		if err := tasklist.Sort(todo.SortTaskIDDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttodotextasc") == true {
+		if err := tasklist.Sort(todo.SortTodoTextAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttodotextdesc") == true {
+		if err := tasklist.Sort(todo.SortTodoTextDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortpriorityasc") == true {
+		if err := tasklist.Sort(todo.SortPriorityAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortprioritydesc") == true {
+		if err := tasklist.Sort(todo.SortPriorityDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcreateddateasc") == true {
+		if err := tasklist.Sort(todo.SortCreatedDateAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcreateddatedesc") == true {
+		if err := tasklist.Sort(todo.SortTodoTextAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcompleteddateasc") == true {
+		if err := tasklist.Sort(todo.SortCompletedDateAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcompleteddatedesc") == true {
+		if err := tasklist.Sort(todo.SortCompletedDateDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortduedateasc") == true {
+		if err := tasklist.Sort(todo.SortDueDateAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortduedatedesc") == true {
+		if err := tasklist.Sort(todo.SortDueDateDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcontextasc") == true {
+		if err := tasklist.Sort(todo.SortContextAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcontextdesc") == true {
+		if err := tasklist.Sort(todo.SortContextDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortprojectasc") == true {
+		if err := tasklist.Sort(todo.SortProjectAsc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortprojectdesc") == true {
+		if err := tasklist.Sort(todo.SortProjectDesc); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tasklist)
+	}
 }
