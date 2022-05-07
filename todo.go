@@ -9,7 +9,7 @@ import (
 
 	"strings"
 
-	// "regexp"
+	"regexp"
 	// "bytes"
 	// "time"
 
@@ -18,37 +18,43 @@ import (
 
 func main() {
 
+	var tasklist todo.TaskList
+
 	if len(os.Args) < 2 {
 		fmt.Println("expected command(s)")
 		os.Exit(1)
 	}
 
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
-		getTasksDefault()
+		getTasksDefault(tasklist)
+		// ls |order
 	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
-		getTasksOrder()
+		getTasksOrder(tasklist)
+		// ls + (projects)
+	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
+		getTasksProjects(tasklist)
+	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
+		getTasksContext(tasklist)
 	} else if os.Args[1] == "add" {
-		addTask()
+		addTask(tasklist)
 	} else if os.Args[1] == "rm" {
-		removeTask()
+		removeTask(tasklist)
 	} else if os.Args[1] == "do" {
-		completeTask()
+		completeTask(tasklist)
 	} else if os.Args[1] == "projects" {
-		getProjects()
+		getProjects(tasklist)
 	} else if os.Args[1] == "tags" {
-		getTags()
+		getTags(tasklist)
 	}
 }
 
-func getTasksDefault() {
+func getTasksDefault(tasklist todo.TaskList) {
 
 	// if tasklist, err := todo.LoadFromPath("todo.txt"); err != nil {
 	// 	log.Fatal(err)
 	// } else {
 	// 	fmt.Print(tasklist)
 	// }
-
-	var tasklist todo.TaskList
 
 	// Prints completed Tasks for default LS
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
@@ -73,9 +79,8 @@ func getTasksDefault() {
 	}
 }
 
-func addTask() {
+func addTask(tasklist todo.TaskList) {
 	// Create empty Tasklist
-	var tasklist todo.TaskList
 
 	// Populates tasklist from file
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
@@ -101,8 +106,7 @@ func addTask() {
 	}
 }
 
-func removeTask() {
-	var tasklist todo.TaskList
+func removeTask(tasklist todo.TaskList) {
 
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
@@ -123,8 +127,7 @@ func removeTask() {
 	}
 }
 
-func completeTask() {
-	var tasklist todo.TaskList
+func completeTask(tasklist todo.TaskList) {
 
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
@@ -150,8 +153,7 @@ func completeTask() {
 	}
 }
 
-func getProjects() {
-	var tasklist todo.TaskList
+func getProjects(tasklist todo.TaskList) {
 
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
@@ -166,8 +168,8 @@ func getProjects() {
 	// }
 
 	for i := 0; i < len(tasklist); i++ {
-		if tasklist[i].Projects != nil {
-			taskProjects = append(tasklist[i].Projects, taskProjects...)
+		if (tasklist)[i].Projects != nil {
+			taskProjects = append((tasklist)[i].Projects, taskProjects...)
 		}
 	}
 
@@ -195,8 +197,7 @@ func removeDupStr(tasklistSlice []string) []string {
 	return projectList
 }
 
-func getTags() {
-	var tasklist todo.TaskList
+func getTags(tasklist todo.TaskList) {
 
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
@@ -222,17 +223,16 @@ func getTags() {
 	}
 }
 
-func getTasksOrder() {
-
-	var tasklist todo.TaskList
+func getTasksOrder(tasklist todo.TaskList) {
+	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
 	// Prints completed Tasks for default LS
 	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
 		log.Fatal(err)
 	}
+	// delete below line if you want to include completed or you could opt copy & paste everything with "tasklist = tasklist.Filter(todo.FilterCompleted) to have completed show on another line."
 	tasklist = tasklist.Filter(todo.FilterNotCompleted)
 
-	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 	if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttaskidasc") == true {
 		if err := tasklist.Sort(todo.SortTaskIDAsc); err != nil {
 			log.Fatal(err)
@@ -314,4 +314,58 @@ func getTasksOrder() {
 		}
 		fmt.Println(tasklist)
 	}
+}
+
+func getTasksContext(tasklist todo.TaskList) {
+
+	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
+		log.Fatal(err)
+	}
+
+	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
+
+	userInputProjects := extractContext(strings.Join(os.Args, " "))
+
+	for _, tk := range tasklist {
+		for _, ui := range userInputProjects {
+			// fmt.Println(ui)
+			if strings.Contains(tk.Original, ui) {
+				fmt.Println(tk.Original)
+			}
+		}
+	}
+}
+
+func extractContext(userContext string) []string {
+	re := regexp.MustCompile("@\\S+")
+	contexts := re.FindAllString(userContext, -1)
+
+	return contexts
+}
+
+func getTasksProjects(tasklist todo.TaskList) {
+
+	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
+		log.Fatal(err)
+	}
+
+	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
+
+	userInputProjects := extractContext(strings.Join(os.Args, " "))
+
+	for _, tk := range tasklist {
+		for _, ui := range userInputProjects {
+			// fmt.Println(ui)
+			if strings.Contains(tk.Original, ui) {
+				fmt.Println(tk.Original)
+			}
+		}
+	}
+}
+
+func extractProject(userContext string) []string {
+	re := regexp.MustCompile("+\\S+")
+	contexts := re.FindAllString(userContext, -1)
+
+	return contexts
 }
