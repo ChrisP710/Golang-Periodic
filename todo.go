@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	// "bytes"
-	// "time"
+	// Used in some prior implementations
+	// "bytes" // "time"
 
 	todo "github.com/1set/todotxt"
 
@@ -19,13 +19,14 @@ import (
 )
 
 func main() {
-	// Could have opted to use switch statements instead of if chain
 	tasklist, err := todo.LoadFromPath("todo.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	tasklist2 := make(map[string]bool)
+
+	// Could have opted to use switch statements instead of if chain
 
 	if len(os.Args) < 2 {
 		fmt.Println("expected command(s)")
@@ -52,7 +53,6 @@ func main() {
 	// ls - Default
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
 		getTasksDefault(tasklist)
-
 		return
 	}
 
@@ -94,18 +94,13 @@ func main() {
 	for tk, _ := range tasklist2 {
 		fmt.Println(tk)
 	}
-
-	// for Task, _ := range tasklist2 {
-	// 	fmt.Println(Task)
-	// }
 }
 
-//----------------------- Note to self: Avoid using prints throughout -----------------------------
+//----------------------- Note to self: Avoid using prints throughout | Only when necessary -----------------------------
 
 func getTasksDefault(tasklist todo.TaskList) {
 
 	// Prints completed Tasks for default LS
-
 	tasklistNonCompleted := tasklist.Filter(todo.FilterNotCompleted)
 	if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
 		log.Fatal(err)
@@ -113,13 +108,11 @@ func getTasksDefault(tasklist todo.TaskList) {
 	fmt.Println(tasklistNonCompleted)
 
 	// Prints non-completed Tasks for default LS | Note: Unsure if completed task are meant to be displayed with default ls command
-
 	tasklistCompleted := tasklist.Filter(todo.FilterCompleted)
 	if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(tasklistCompleted)
-
 }
 
 func addTask(tasklist todo.TaskList) {
@@ -186,6 +179,7 @@ func getProjects(tasklist todo.TaskList) {
 
 	var taskProjects []string
 
+	// Used to test output when creating | Would normally delete
 	// for i := 0; i < len(tasklist); i++ {
 	// 	if tasklist[i].Projects != nil {
 	// 		fmt.Println(tasklist[i].Projects)
@@ -210,6 +204,7 @@ func getProjects(tasklist todo.TaskList) {
 
 }
 
+// Function to remove duplicate strings for Project function
 func removeDupStr(tasklistSlice []string) []string {
 	allKeys := make(map[string]bool)
 	projectList := []string{}
@@ -223,7 +218,7 @@ func removeDupStr(tasklistSlice []string) []string {
 }
 
 func getTags(tasklist todo.TaskList) {
-
+	// Used to test output when creating | Would normally delete
 	// for i := 0; i < len(tasklist); i++ {
 	// 	if len(tasklist[i].AdditionalTags) > 0 {
 	// 		fmt.Println(tasklist[i].AdditionalTags)
@@ -245,40 +240,26 @@ func getTags(tasklist todo.TaskList) {
 
 }
 
-// func getTasksOrder2(tasklist todo.TaskList, tasklist2 map[string]bool) todo.TaskList {
-
 func getTasksOrder(tasklist todo.TaskList, tasklist2 *map[string]bool) todo.TaskList {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
-	//Note: Prints
-	// for _, task := range tasklist {
-	// 	fmt.Println(task)
-	// }
+	// Used to test output when creating | Would normally delete
+	// fmt.Println(len(*tasklist2))
+	if len(*tasklist2) > 0 {
+		tasklist = todo.NewTaskList()
 
-	// Note: Doesn't Print with this
-	//tasklist = todo.NewTaskList()
-	tasklist = todo.NewTaskList()
-
-	// for _, task := range tasklist {
-	// 	fmt.Println(task)
-	// 	fmt.Println("Test")
-	// }
-	// fmt.Println(*tasklist2, "tasklist2")
-
-	for key, _ := range *tasklist2 {
-		newTask, err := todo.ParseTask(key)
-		if err != nil {
-			log.Fatal(err)
+		for key, _ := range *tasklist2 {
+			newTask, err := todo.ParseTask(key)
+			if err != nil {
+				log.Fatal(err)
+			}
+			tasklist.AddTask(newTask)
 		}
-		// fmt.Println(newTask, "\n newTask")
-		tasklist.AddTask(newTask)
-		// fmt.Println(tasklist, "\ntasklistfuck")
 	}
-	// fmt.Println(tasklist, "tasklist3")
-	// fmt.Println(*tasklist2, "tasklist4")
 
 	tasklist = tasklist.Filter(todo.FilterNotCompleted)
 
+	// Could add pipe | symbol to substring in string contains, incase user added a sort type as a parameter when using ls not intended for the |order sub-function
 	if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttaskidasc") == true {
 		if err := tasklist.Sort(todo.SortTaskIDAsc); err != nil {
 			log.Fatal(err)
@@ -365,6 +346,7 @@ func getTasksOrder(tasklist todo.TaskList, tasklist2 *map[string]bool) todo.Task
 }
 
 func getTasksContext(tasklist todo.TaskList, tasklist2 *map[string]bool) {
+	// Used to test output when creating | Would normally delete
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
 	userInputContext := extractContext(strings.Join(os.Args, " "))
@@ -387,7 +369,7 @@ func extractContext(userContext string) []string {
 }
 
 func getTasksProjects(tasklist todo.TaskList, tasklist2 *map[string]bool) {
-
+	// Used to test output when creating | Would normally delete
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
 	userInputProjects := extractProject(strings.Join(os.Args, " "))
