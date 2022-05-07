@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-
+	// Could have opted to use switch statements instead of if chain
 	tasklist, err := todo.LoadFromPath("todo.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -28,25 +28,41 @@ func main() {
 		os.Exit(1)
 	}
 
+	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
+		getTasksOrder(tasklist)
+		// ls + (projects)
+	}
+
+	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
+		getTasksContext(tasklist)
+	}
+
+	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "+") == true {
+		getTasksProjects(tasklist)
+	}
+
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
 		getTasksDefault(tasklist)
 		// ls |order
-	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
-		getTasksOrder(tasklist)
-		// ls + (projects)
-	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "+") == true {
-		getTasksProjects(tasklist)
-	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
-		getTasksContext(tasklist)
-	} else if os.Args[1] == "add" {
+	}
+
+	if os.Args[1] == "add" {
 		addTask(tasklist)
-	} else if os.Args[1] == "rm" {
+	}
+
+	if os.Args[1] == "rm" {
 		removeTask(tasklist)
-	} else if os.Args[1] == "do" {
+	}
+
+	if os.Args[1] == "do" {
 		completeTask(tasklist)
-	} else if os.Args[1] == "projects" {
+	}
+
+	if os.Args[1] == "projects" {
 		getProjects(tasklist)
-	} else if os.Args[1] == "tags" {
+	}
+
+	if os.Args[1] == "tags" {
 		getTags(tasklist)
 	}
 }
