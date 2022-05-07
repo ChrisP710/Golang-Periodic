@@ -1,6 +1,6 @@
 (A) Call Mom @Phone +Family Test:okay Working:Yes
 (A) Schedule annual checkup +Health
-(C) Add cover sheets @Office +TPSReports:okay
+(C) Add cover sheets @Office +TPSReports
 Plan backyard herb garden @Home
 Pick up milk @GroceryStore
 Research self-publishing services @Computer +Novel

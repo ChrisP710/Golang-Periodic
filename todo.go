@@ -37,6 +37,8 @@ func main() {
 		todoExplain()
 	}
 
+	// ******   Required Compoments   ******
+
 	// ls - @Context
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
 		getTasksContext(tasklist, &tasklist2)
@@ -56,7 +58,7 @@ func main() {
 
 	// ls - |Order
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
-		getTasksOrder(tasklist, tasklist2)
+		getTasksOrder(tasklist, &tasklist2)
 	}
 
 	// add <task-id>
@@ -87,9 +89,13 @@ func main() {
 	for tk, _ := range tasklist2 {
 		fmt.Println(tk)
 	}
+
+	// for Task, _ := range tasklist2 {
+	// 	fmt.Println(Task)
+	// }
 }
 
-//----------------------- Avoid using Prints -----------------------------
+//----------------------- Note to self: Avoid using prints throughout -----------------------------
 
 func getTasksDefault(tasklist todo.TaskList) {
 
@@ -231,21 +237,40 @@ func getTags(tasklist todo.TaskList) {
 	for key, _ := range finalMap {
 		fmt.Println(key)
 	}
+
 }
 
-func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) todo.TaskList {
+// func getTasksOrder2(tasklist todo.TaskList, tasklist2 map[string]bool) todo.TaskList {
+
+func getTasksOrder(tasklist todo.TaskList, tasklist2 *map[string]bool) todo.TaskList {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
+	//Note: Prints
+	// for _, task := range tasklist {
+	// 	fmt.Println(task)
+	// }
+
+	// Note: Doesn't Print with this
+	//tasklist = todo.NewTaskList()
 	tasklist = todo.NewTaskList()
 
-	for key, _ := range tasklist2 {
+	// for _, task := range tasklist {
+	// 	fmt.Println(task)
+	// 	fmt.Println("Test")
+	// }
+	// fmt.Println(*tasklist2, "tasklist2")
+
+	for key, _ := range *tasklist2 {
 		newTask, err := todo.ParseTask(key)
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		// fmt.Println(newTask, "newTask")
 		tasklist.AddTask(newTask)
+		// fmt.Println(tasklist, "tasklistfuck")
 	}
+	// fmt.Println(tasklist, "tasklist3")
+	// fmt.Println(*tasklist2, "tasklist4")
 
 	tasklist = tasklist.Filter(todo.FilterNotCompleted)
 
@@ -330,13 +355,11 @@ func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) todo.TaskL
 		}
 		return tasklist
 	} else {
-		// potentially return outside of else;
 		return tasklist
 	}
 }
 
 func getTasksContext(tasklist todo.TaskList, tasklist2 *map[string]bool) {
-
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
 	userInputContext := extractContext(strings.Join(os.Args, " "))
