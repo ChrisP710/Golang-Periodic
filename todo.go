@@ -173,7 +173,7 @@ func completeTask(tasklist todo.TaskList) {
 
 func getProjects(tasklist todo.TaskList) {
 
-	taskProjects := make([]string, 0, 100)
+	var taskProjects []string
 
 	// for i := 0; i < len(tasklist); i++ {
 	// 	if tasklist[i].Projects != nil {
@@ -187,7 +187,7 @@ func getProjects(tasklist todo.TaskList) {
 		}
 	}
 
-	taskProjectsDupFree := make([]string, 0, 100)
+	var taskProjectsDupFree []string
 
 	for i := 0; i < len(taskProjects); i++ {
 		taskProjectsDupFree = removeDupStr(taskProjects)
