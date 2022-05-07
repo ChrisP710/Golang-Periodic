@@ -23,17 +23,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	tasklist2 := make(map[string]bool)
+
 	if len(os.Args) < 2 {
 		fmt.Println("expected command(s)")
 		os.Exit(1)
 	}
 
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
-		getTasksContext(tasklist)
+		getTasksContext(tasklist, tasklist2)
 	}
 
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "+") == true {
-		getTasksProjects(tasklist)
+		getTasksProjects(tasklist, tasklist2)
 	}
 
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
@@ -42,7 +44,7 @@ func main() {
 	}
 
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
-		getTasksOrder(tasklist)
+		getTasksOrder(tasklist, tasklist2)
 		// ls + (projects)
 	}
 
@@ -65,7 +67,13 @@ func main() {
 	if os.Args[1] == "tags" {
 		getTags(tasklist)
 	}
+
+	for _, tk := range tasklist {
+		fmt.Println(tk)
+	}
 }
+
+//----------------------- Avoid using Prints -----------------------------
 
 func getTasksDefault(tasklist todo.TaskList) {
 
@@ -219,10 +227,20 @@ func getTags(tasklist todo.TaskList) {
 }
 
 // When using function in windows, must put in string due to "|"
-func getTasksOrder(tasklist todo.TaskList) {
+func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
 	// delete below line if you want to include completed or you could opt copy & paste everything with "tasklist = tasklist.Filter(todo.FilterCompleted) to have completed show on another line."
+	tasklist = todo.NewTaskList()
+
+	for key, _ := range tasklist2 {
+		newTask, err := todo.ParseTask(key)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tasklist.AddTask(newTask)
+	}
 
 	tasklist = tasklist.Filter(todo.FilterNotCompleted)
 
@@ -309,7 +327,7 @@ func getTasksOrder(tasklist todo.TaskList) {
 	}
 }
 
-func getTasksContext(tasklist todo.TaskList) {
+func getTasksContext(tasklist todo.TaskList, tasklist2 map[string]bool) {
 
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
@@ -319,7 +337,7 @@ func getTasksContext(tasklist todo.TaskList) {
 		for _, ui := range userInputContext {
 			// fmt.Println(ui)
 			if strings.Contains(tk.Original, ui) {
-				fmt.Println(tk.Original)
+				tasklist2[tk.Original] = true
 			}
 		}
 	}
@@ -332,7 +350,7 @@ func extractContext(userContext string) []string {
 	return contexts
 }
 
-func getTasksProjects(tasklist todo.TaskList) {
+func getTasksProjects(tasklist todo.TaskList, tasklist2 map[string]bool) {
 
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
@@ -342,10 +360,13 @@ func getTasksProjects(tasklist todo.TaskList) {
 		for _, ui := range userInputProjects {
 			// fmt.Println(ui)
 			if strings.Contains(tk.Original, ui) {
-				fmt.Println(tk.Original)
+				// fmt.Println(tk.Original)
+
+				tasklist2[tk.Original] = true
 			}
 		}
 	}
+
 }
 
 func extractProject(userProject string) []string {
