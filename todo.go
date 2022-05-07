@@ -7,13 +7,15 @@ import (
 
 	"strconv"
 
-	"strings"
-
 	"regexp"
+	"strings"
+	
 	// "bytes"
 	// "time"
 
 	todo "github.com/1set/todotxt"
+
+	"github.com/TwiN/go-color"
 )
 
 func main() {
@@ -31,21 +33,21 @@ func main() {
 	}
 
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
-		getTasksContext(tasklist, tasklist2)
+		getTasksContext(tasklist, &tasklist2)
 	}
 
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "+") == true {
-		getTasksProjects(tasklist, tasklist2)
+		getTasksProjects(tasklist, &tasklist2)
 	}
 
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
 		getTasksDefault(tasklist)
-		// ls |order
+
+		return
 	}
 
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
 		getTasksOrder(tasklist, tasklist2)
-		// ls + (projects)
 	}
 
 	if os.Args[1] == "add" {
@@ -68,7 +70,7 @@ func main() {
 		getTags(tasklist)
 	}
 
-	for _, tk := range tasklist {
+	for tk, _ := range tasklist2 {
 		fmt.Println(tk)
 	}
 }
@@ -227,7 +229,7 @@ func getTags(tasklist todo.TaskList) {
 }
 
 // When using function in windows, must put in string due to "|"
-func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) {
+func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) todo.TaskList {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
 	// delete below line if you want to include completed or you could opt copy & paste everything with "tasklist = tasklist.Filter(todo.FilterCompleted) to have completed show on another line."
@@ -248,86 +250,89 @@ func getTasksOrder(tasklist todo.TaskList, tasklist2 map[string]bool) {
 		if err := tasklist.Sort(todo.SortTaskIDAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttaskiddesc") == true {
 		if err := tasklist.Sort(todo.SortTaskIDDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttodotextasc") == true {
 		if err := tasklist.Sort(todo.SortTodoTextAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttodotextdesc") == true {
 		if err := tasklist.Sort(todo.SortTodoTextDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortpriorityasc") == true {
 		if err := tasklist.Sort(todo.SortPriorityAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortprioritydesc") == true {
 		if err := tasklist.Sort(todo.SortPriorityDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcreateddateasc") == true {
 		if err := tasklist.Sort(todo.SortCreatedDateAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcreateddatedesc") == true {
 		if err := tasklist.Sort(todo.SortTodoTextAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcompleteddateasc") == true {
 		if err := tasklist.Sort(todo.SortCompletedDateAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcompleteddatedesc") == true {
 		if err := tasklist.Sort(todo.SortCompletedDateDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortduedateasc") == true {
 		if err := tasklist.Sort(todo.SortDueDateAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortduedatedesc") == true {
 		if err := tasklist.Sort(todo.SortDueDateDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcontextasc") == true {
 		if err := tasklist.Sort(todo.SortContextAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortcontextdesc") == true {
 		if err := tasklist.Sort(todo.SortContextDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortprojectasc") == true {
 		if err := tasklist.Sort(todo.SortProjectAsc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
 	} else if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sortprojectdesc") == true {
 		if err := tasklist.Sort(todo.SortProjectDesc); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(tasklist)
+		return tasklist
+	} else {
+		// potentially return outside of else;
+		return tasklist
 	}
 }
 
-func getTasksContext(tasklist todo.TaskList, tasklist2 map[string]bool) {
+func getTasksContext(tasklist todo.TaskList, tasklist2 *map[string]bool) {
 
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
@@ -337,7 +342,7 @@ func getTasksContext(tasklist todo.TaskList, tasklist2 map[string]bool) {
 		for _, ui := range userInputContext {
 			// fmt.Println(ui)
 			if strings.Contains(tk.Original, ui) {
-				tasklist2[tk.Original] = true
+				(*tasklist2)[tk.Original] = true
 			}
 		}
 	}
@@ -350,7 +355,7 @@ func extractContext(userContext string) []string {
 	return contexts
 }
 
-func getTasksProjects(tasklist todo.TaskList, tasklist2 map[string]bool) {
+func getTasksProjects(tasklist todo.TaskList, tasklist2 *map[string]bool) {
 
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
@@ -362,11 +367,10 @@ func getTasksProjects(tasklist todo.TaskList, tasklist2 map[string]bool) {
 			if strings.Contains(tk.Original, ui) {
 				// fmt.Println(tk.Original)
 
-				tasklist2[tk.Original] = true
+				(*tasklist2)[tk.Original] = true
 			}
 		}
 	}
-
 }
 
 func extractProject(userProject string) []string {
@@ -374,4 +378,9 @@ func extractProject(userProject string) []string {
 	contexts := re.FindAllString(userProject, -1)
 
 	return contexts
+}
+
+func todoExplain() {
+	println(color.Ize(color.Red, "This is red"))
+
 }
