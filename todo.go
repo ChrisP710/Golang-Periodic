@@ -28,11 +28,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
-		getTasksOrder(tasklist)
-		// ls + (projects)
-	}
-
 	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
 		getTasksContext(tasklist)
 	}
@@ -44,6 +39,11 @@ func main() {
 	if os.Args[1] == "ls" && len(os.Args[1:]) < 2 {
 		getTasksDefault(tasklist)
 		// ls |order
+	}
+
+	if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
+		getTasksOrder(tasklist)
+		// ls + (projects)
 	}
 
 	if os.Args[1] == "add" {
@@ -223,6 +223,7 @@ func getTasksOrder(tasklist todo.TaskList) {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
 	// delete below line if you want to include completed or you could opt copy & paste everything with "tasklist = tasklist.Filter(todo.FilterCompleted) to have completed show on another line."
+
 	tasklist = tasklist.Filter(todo.FilterNotCompleted)
 
 	if strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sorttaskidasc") == true {
