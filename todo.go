@@ -18,7 +18,10 @@ import (
 
 func main() {
 
-	var tasklist todo.TaskList
+	tasklist, err := todo.LoadFromPath("todo.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if len(os.Args) < 2 {
 		fmt.Println("expected command(s)")
@@ -31,7 +34,7 @@ func main() {
 	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "sort") == true {
 		getTasksOrder(tasklist)
 		// ls + (projects)
-	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
+	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "+") == true {
 		getTasksProjects(tasklist)
 	} else if os.Args[1] == "ls" && strings.Contains(strings.ToLower(strings.Join(os.Args, " ")), "@") == true {
 		getTasksContext(tasklist)
@@ -57,35 +60,27 @@ func getTasksDefault(tasklist todo.TaskList) {
 	// }
 
 	// Prints completed Tasks for default LS
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
+
+	tasklistNonCompleted := tasklist.Filter(todo.FilterNotCompleted)
+	if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
 		log.Fatal(err)
-	} else {
-		tasklist := tasklist.Filter(todo.FilterNotCompleted)
-		if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(tasklist)
 	}
+	fmt.Println(tasklistNonCompleted)
 
 	// Prints non-completed Tasks for default LS | Note: Unsure if completed task are meant to be displayed with default ls command
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
+
+	tasklistCompleted := tasklist.Filter(todo.FilterCompleted)
+	if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
 		log.Fatal(err)
-	} else {
-		tasklist := tasklist.Filter(todo.FilterCompleted)
-		if err := tasklist.Sort(todo.SortPriorityAsc, todo.SortDueDateAsc, todo.SortCreatedDateAsc); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(tasklist)
 	}
+	fmt.Println(tasklistCompleted)
+
 }
 
 func addTask(tasklist todo.TaskList) {
 	// Create empty Tasklist
 
 	// Populates tasklist from file
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
 
 	//Concatenating user input into single string and setting it to a variable
 	userInput := strings.Join(os.Args[2:], " ")
@@ -108,10 +103,6 @@ func addTask(tasklist todo.TaskList) {
 
 func removeTask(tasklist todo.TaskList) {
 
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
-
 	userInput := os.Args[2]
 
 	intInput, err := strconv.Atoi(userInput)
@@ -128,10 +119,6 @@ func removeTask(tasklist todo.TaskList) {
 }
 
 func completeTask(tasklist todo.TaskList) {
-
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
 
 	userInput := os.Args[2]
 
@@ -154,10 +141,6 @@ func completeTask(tasklist todo.TaskList) {
 }
 
 func getProjects(tasklist todo.TaskList) {
-
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
 
 	taskProjects := make([]string, 0, 100)
 
@@ -199,10 +182,6 @@ func removeDupStr(tasklistSlice []string) []string {
 
 func getTags(tasklist todo.TaskList) {
 
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
-
 	// for i := 0; i < len(tasklist); i++ {
 	// 	if len(tasklist[i].AdditionalTags) > 0 {
 	// 		fmt.Println(tasklist[i].AdditionalTags)
@@ -223,13 +202,10 @@ func getTags(tasklist todo.TaskList) {
 	}
 }
 
+// When using function in windows, must put in string due to "|"
 func getTasksOrder(tasklist todo.TaskList) {
 	// Rudimentary way of checking user input and sorting tasklist (Possibly Revisit)
 
-	// Prints completed Tasks for default LS
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
 	// delete below line if you want to include completed or you could opt copy & paste everything with "tasklist = tasklist.Filter(todo.FilterCompleted) to have completed show on another line."
 	tasklist = tasklist.Filter(todo.FilterNotCompleted)
 
@@ -318,16 +294,12 @@ func getTasksOrder(tasklist todo.TaskList) {
 
 func getTasksContext(tasklist todo.TaskList) {
 
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
-
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
-	userInputProjects := extractContext(strings.Join(os.Args, " "))
+	userInputContext := extractContext(strings.Join(os.Args, " "))
 
 	for _, tk := range tasklist {
-		for _, ui := range userInputProjects {
+		for _, ui := range userInputContext {
 			// fmt.Println(ui)
 			if strings.Contains(tk.Original, ui) {
 				fmt.Println(tk.Original)
@@ -337,7 +309,7 @@ func getTasksContext(tasklist todo.TaskList) {
 }
 
 func extractContext(userContext string) []string {
-	re := regexp.MustCompile("@\\S+")
+	re := regexp.MustCompile("\\@[a-zA-Z]+")
 	contexts := re.FindAllString(userContext, -1)
 
 	return contexts
@@ -345,13 +317,9 @@ func extractContext(userContext string) []string {
 
 func getTasksProjects(tasklist todo.TaskList) {
 
-	if err := tasklist.LoadFromPath("todo.txt"); err != nil {
-		log.Fatal(err)
-	}
-
 	// fmt.Println(extractContext(strings.ToLower(strings.Join(os.Args, " "))))
 
-	userInputProjects := extractContext(strings.Join(os.Args, " "))
+	userInputProjects := extractProject(strings.Join(os.Args, " "))
 
 	for _, tk := range tasklist {
 		for _, ui := range userInputProjects {
@@ -363,9 +331,9 @@ func getTasksProjects(tasklist todo.TaskList) {
 	}
 }
 
-func extractProject(userContext string) []string {
-	re := regexp.MustCompile("+\\S+")
-	contexts := re.FindAllString(userContext, -1)
+func extractProject(userProject string) []string {
+	re := regexp.MustCompile("\\+[a-zA-Z]+")
+	contexts := re.FindAllString(userProject, -1)
 
 	return contexts
 }
